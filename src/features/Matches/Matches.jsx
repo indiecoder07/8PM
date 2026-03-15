@@ -191,14 +191,14 @@ export function Matches({ className }) {
 
         {/* Scoresheet upload */}
         <div className={shared.panel}>
-          <SectionTitle title="Scoresheet upload" subtitle="Upload a photo and AI extracts the stats" />
+          <SectionTitle title="Scoresheet upload" subtitle="Upload a scoresheet to auto-create a match and extract stats" />
           <label className={cx(shared.uploadCard, extracting && styles.uploading)}>
             <input
               type="file"
               accept="image/*"
               disabled={extracting}
               onChange={(e) => {
-                handleUpload(e.target.files?.[0]);
+                handleUpload(e.target.files?.[0], matchForm.seasonId);
                 e.target.value = "";
               }}
             />
@@ -210,7 +210,10 @@ export function Matches({ className }) {
             ) : (
               <>
                 <span>Upload scoresheet image</span>
-                <small className={shared.muted}>Takes a photo of the scoresheet and extracts batting &amp; bowling stats.</small>
+                <small className={shared.muted}>
+                  Creates a match (opponent, scores, result) and extracts player stats automatically.
+                  Uses the season selected above.
+                </small>
               </>
             )}
           </label>

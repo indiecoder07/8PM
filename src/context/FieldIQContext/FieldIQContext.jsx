@@ -297,11 +297,9 @@ export function FieldIQProvider({ children }) {
   const [extracting, setExtracting] = useState(false);
 
   const handleUpload = useCallback(
-    async (file) => {
-      if (!file || !eventDraft.matchId) return;
+    async (file, seasonId) => {
+      if (!file) return;
 
-      const matchId = eventDraft.matchId;
-      const match   = data.matches.find((m) => m.id === matchId);
       const activePlayers = data.players.filter((p) => p.active);
 
       if (activePlayers.length === 0) {
@@ -331,8 +329,23 @@ export function FieldIQProvider({ children }) {
           return;
         }
 
-        // Tag each scorecard with an ID and the match
-        const scorecards = result.scorecards.map((sc) => ({
+        // Auto-create a match from extracted metadata
+        const matchMeta = result.match || {};
+        const matchId   = uid("match");
+        const today     = new Date().toISOString().slice(0, 10);
+
+        const newMatch = {
+          id:            matchId,
+          seasonId:      seasonId || data.seasons[0]?.id || "",
+          date:          today,
+          opponent:      matchMeta.opponent || "Unknown",
+          result:        ["W", "L", "D"].includes(matchMeta.result) ? matchMeta.result : "D",
+          ourScore:      Number(matchMeta.ourScore) || 0,
+          opponentScore: Number(matchMeta.opponentScore) || 0,
+        };
+
+        // Tag each scorecard with an ID and the new match
+        const scorecards = (result.scorecards || []).map((sc) => ({
           ...sc,
           id: uid("score"),
           matchId,
@@ -340,10 +353,8 @@ export function FieldIQProvider({ children }) {
 
         updateData((current) => ({
           ...current,
-          scorecards: [
-            ...current.scorecards.filter((sc) => sc.matchId !== matchId),
-            ...scorecards,
-          ],
+          matches: [newMatch, ...current.matches],
+          scorecards: [...current.scorecards, ...scorecards],
           uploads: [
             {
               id:         uid("upload"),
@@ -355,8 +366,9 @@ export function FieldIQProvider({ children }) {
           ],
         }));
 
+        setEventDraft((prev) => ({ ...prev, matchId }));
         setUploadMessage(
-          `Extracted ${scorecards.length} player stats for ${match?.opponent || "the selected match"} from ${file.name}.`,
+          `Created match vs ${newMatch.opponent} (${newMatch.ourScore}–${newMatch.opponentScore}, ${newMatch.result}) and extracted ${scorecards.length} player stats.`,
         );
       } catch (err) {
         console.error("Upload extraction error:", err);
@@ -365,7 +377,7 @@ export function FieldIQProvider({ children }) {
         setExtracting(false);
       }
     },
-    [data.players, data.matches, eventDraft.matchId, updateData],
+    [data.players, data.seasons, updateData],
   );
 
   const resetDemo = useCallback(() => {

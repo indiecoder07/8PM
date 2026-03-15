@@ -1,9 +1,12 @@
 /**
- * /api/extract — Scoresheet image → structured player stats via Gemini Vision
+ * /api/extract — Scoresheet image → structured match + player stats via Gemini Vision
  *
  * POST /api/extract
  *   Body: { image: "<base64 data URL>", players: [{ id, name }] }
- *   Returns: { scorecards: [ { playerId, rs, sr, ob, rc, wkts, econ, c } ] }
+ *   Returns: {
+ *     match:      { opponent, ourScore, opponentScore, result },
+ *     scorecards: [ { playerId, rs, sr, ob, rc, wkts, econ, c } ]
+ *   }
  *
  * Requires GEMINI_API_KEY environment variable.
  */
@@ -41,35 +44,50 @@ export default async function handler(req, res) {
     }
 
     // Extract base64 content and media type from data URL
-    const match = image.match(/^data:(image\/\w+);base64,(.+)$/);
-    if (!match) {
+    const imgMatch = image.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (!imgMatch) {
       return res.status(400).json({ error: "Invalid image data URL format." });
     }
-    const [, mimeType, base64Data] = match;
+    const [, mimeType, base64Data] = imgMatch;
 
     const playerList = players.map((p) => `- ${p.name} (id: ${p.id})`).join("\n");
 
     const prompt = `You are extracting indoor cricket scorecard data from a scoresheet image.
 
-Here are the players in the team:
+IMPORTANT: Our team is called "8PM". The scoresheet contains data for two teams. You must ONLY extract data from the "8PM" section. Ignore the opponent team's player data entirely.
+
+Here are the 8PM players:
 ${playerList}
 
-Look at the scoresheet image and extract each player's performance stats. For each player you can identify in the scoresheet, return their stats.
+TASK 1 — Match metadata:
+Look at the top of the scoresheet for the team names and total scores.
+- The opponent is the OTHER team (not 8PM).
+- "ourScore" is the TOTAL score for 8PM.
+- "opponentScore" is the TOTAL score for the opponent.
+- "result": "W" if ourScore > opponentScore, "L" if less, "D" if tied.
 
-Return ONLY a valid JSON array. Each entry must have exactly these fields:
-- "playerId": the player's id from the list above (match by name)
-- "rs": runs scored (number)
-- "sr": strike rate (number)
-- "ob": overs bowled (number)
-- "rc": runs conceded (number)
-- "wkts": wickets taken (number)
-- "econ": economy rate (number, rc/ob rounded to 1 decimal)
-- "c": contribution score (number, rs minus rc)
+TASK 2 — Player scorecards:
+Find the summary table under the "8PM" heading. It has columns: Name, RS, SR, OB, RC, Wkts, Econ, C.
+For each player you can match by name to the list above, extract their row.
 
-If you cannot find a player's data, omit them. If a field is unclear, use 0.
+Return ONLY a valid JSON object with this exact structure:
+{
+  "match": {
+    "opponent": "Team Name",
+    "ourScore": 95,
+    "opponentScore": 45,
+    "result": "W"
+  },
+  "scorecards": [
+    {"playerId":"player-abc123","rs":17,"sr":130.77,"ob":2,"rc":-5,"wkts":3,"econ":-2.5,"c":22}
+  ]
+}
 
-Return ONLY the JSON array, no markdown, no explanation. Example:
-[{"playerId":"player-abc123","rs":24,"sr":150,"ob":2,"rc":14,"wkts":1,"econ":7.0,"c":10}]`;
+Rules:
+- Match player names from the scoresheet to the player list above. Use fuzzy matching for partial names (e.g. "Mayank Ghosh #16" matches "Mayank Ghosh").
+- If a value is negative, keep it negative (e.g. econ can be negative in indoor cricket).
+- If you cannot find a player's data, omit them from the array.
+- Return ONLY the JSON object, no markdown, no explanation.`;
 
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
@@ -106,39 +124,47 @@ Return ONLY the JSON array, no markdown, no explanation. Example:
     }
 
     const result = await response.json();
-    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
 
-    // Parse the JSON array from Gemini's response
-    let scorecards;
+    // Parse the JSON object from Gemini's response
+    let parsed;
     try {
-      // Strip any markdown code fences if present
       const strippedText = rawText.replace(/```json?\s*/g, "").replace(/```\s*/g, "").trim();
-      scorecards = JSON.parse(strippedText);
+      parsed = JSON.parse(strippedText);
     } catch (parseErr) {
       console.error("[/api/extract] Failed to parse Gemini response:", rawText);
       return res.status(502).json({ error: "Could not parse extraction result.", raw: rawText });
     }
 
-    if (!Array.isArray(scorecards)) {
-      return res.status(502).json({ error: "Extraction did not return an array.", raw: rawText });
-    }
+    // ── Validate match metadata ───────────────────────────────────
+    const matchData = parsed.match || {};
+    const extractedMatch = {
+      opponent:      String(matchData.opponent || "Unknown"),
+      ourScore:      Number(matchData.ourScore) || 0,
+      opponentScore: Number(matchData.opponentScore) || 0,
+      result:        ["W", "L", "D"].includes(matchData.result) ? matchData.result : "D",
+    };
 
-    // Validate and sanitise each entry
+    // ── Validate scorecards ───────────────────────────────────────
+    const rawCards = Array.isArray(parsed.scorecards) ? parsed.scorecards : [];
     const validPlayerIds = new Set(players.map((p) => p.id));
-    const sanitised = scorecards
+    const sanitisedCards = rawCards
       .filter((sc) => sc && validPlayerIds.has(sc.playerId))
       .map((sc) => ({
         playerId: sc.playerId,
-        rs:   Number(sc.rs)   || 0,
-        sr:   Number(sc.sr)   || 0,
-        ob:   Number(sc.ob)   || 0,
-        rc:   Number(sc.rc)   || 0,
-        wkts: Number(sc.wkts) || 0,
-        econ: Number(sc.econ) || 0,
-        c:    Number(sc.c)    || 0,
+        rs:   Number(sc.rs)   ?? 0,
+        sr:   Number(sc.sr)   ?? 0,
+        ob:   Number(sc.ob)   ?? 0,
+        rc:   Number(sc.rc)   ?? 0,
+        wkts: Number(sc.wkts) ?? 0,
+        econ: Number(sc.econ) ?? 0,
+        c:    Number(sc.c)    ?? 0,
       }));
 
-    return res.status(200).json({ scorecards: sanitised });
+    return res.status(200).json({
+      match:      extractedMatch,
+      scorecards: sanitisedCards,
+    });
   } catch (err) {
     console.error("[/api/extract]", err);
     return res.status(500).json({ error: "Internal server error." });
