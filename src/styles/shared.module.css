@@ -135,6 +135,12 @@
   color: var(--good);
 }
 
+.noticeError {
+  composes: notice;
+  color: var(--bad);
+  font-weight: 600;
+}
+
 /* ─── Responsive ───────────────────────────────────────────── */
 
 @media (max-width: 720px) {

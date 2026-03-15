@@ -10,6 +10,7 @@ import { extractScorecard } from "../../services/extraction";
 import { playerSuccess, uid } from "../../utils/helpers";
 
 const FieldIQContext = createContext(null);
+const MAX_UPLOAD_BYTES = 3.5 * 1024 * 1024;
 
 export function FieldIQProvider({ children }) {
   // ── Core data state ────────────────────────────────────────────────────────
@@ -307,6 +308,14 @@ export function FieldIQProvider({ children }) {
         return;
       }
 
+      if (file.size > MAX_UPLOAD_BYTES) {
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(1);
+        setUploadMessage(
+          `Extraction failed: image is ${sizeMb} MB. Please crop/compress it below 3.5 MB and try again.`,
+        );
+        return;
+      }
+
       setExtracting(true);
       setUploadMessage("");
 
@@ -325,7 +334,21 @@ export function FieldIQProvider({ children }) {
         );
 
         if (result.error) {
-          setUploadMessage(`Extraction failed: ${result.error}`);
+          let hint = "";
+          if (result.status === 401) {
+            hint = " Check Vercel env vars: API_SECRET and VITE_API_SECRET must match exactly (or both be empty).";
+          } else if (
+            result.status === 500 &&
+            /GEMINI_API_KEY/i.test(`${result.error} ${result.detail || ""}`)
+          ) {
+            hint = " Set GEMINI_API_KEY in Vercel Project Settings and redeploy.";
+          } else if (result.status === 413) {
+            hint = " This usually means the uploaded file is too large for the serverless request limit.";
+          }
+
+          const detail = result.detail ? ` Detail: ${String(result.detail).slice(0, 180)}` : "";
+          const status = result.status ? ` (${result.status})` : "";
+          setUploadMessage(`Extraction failed${status}: ${result.error}.${hint}${detail}`);
           return;
         }
 

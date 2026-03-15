@@ -26,6 +26,7 @@ export function Matches({ className }) {
 
   const [seasonForm, setSeasonForm] = useState(DEFAULT_SEASON_FORM);
   const [matchForm,  setMatchForm]  = useState(DEFAULT_MATCH_FORM);
+  const isUploadError = uploadMessage.toLowerCase().startsWith("extraction failed");
 
   // Pre-fill seasonId when seasons become available
   useEffect(() => {
@@ -217,7 +218,9 @@ export function Matches({ className }) {
               </>
             )}
           </label>
-          {uploadMessage && <p className={shared.notice}>{uploadMessage}</p>}
+          {uploadMessage && (
+            <p className={isUploadError ? shared.noticeError : shared.notice}>{uploadMessage}</p>
+          )}
         </div>
       </div>
 
