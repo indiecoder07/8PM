@@ -1,0 +1,82 @@
+:root {
+  color-scheme: dark;
+
+  /* Core palette */
+  --bg: #10221c;
+  --panel: rgba(9, 22, 18, 0.76);
+  --panel-strong: #132d24;
+  --line: rgba(232, 239, 218, 0.12);
+  --text: #f6f2e8;
+  --muted: #b8c7bc;
+  --accent: #f5a65b;
+  --good: #71d19e;
+  --bad: #ef7d6d;
+  --shadow: 0 24px 60px rgba(4, 10, 8, 0.35);
+
+  /* Overlays */
+  --overlay-xs: rgba(255, 255, 255, 0.02);
+  --overlay-sm: rgba(255, 255, 255, 0.04);
+  --overlay-md: rgba(255, 255, 255, 0.06);
+  --overlay-lg: rgba(255, 255, 255, 0.08);
+
+  /* Semantic colour overlays (for metric cards & badges) */
+  --mint-overlay: rgba(113, 209, 158, 0.18);
+  --sand-overlay: rgba(245, 166, 91, 0.18);
+  --gold-overlay: rgba(240, 201, 92, 0.18);
+  --coral-overlay: rgba(239, 125, 109, 0.18);
+  --good-overlay: rgba(113, 209, 158, 0.16);
+  --bad-overlay: rgba(239, 125, 109, 0.16);
+
+  /* Inverse text (on dark pill / avatar backgrounds) */
+  --text-inverse: #18231d;
+
+  /* Body gradient anchors */
+  --body-grad-mid: #17352b;
+  --body-grad-end: #0d1713;
+
+  /* Border radius scale */
+  --radius-sm: 14px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 28px;
+  --radius-full: 999px;
+
+  /* Spacing scale */
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 18px;
+  --space-lg: 22px;
+  --space-xl: 28px;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: #efe6d6;
+  --panel: rgba(255, 252, 245, 0.82);
+  --panel-strong: #fffaf0;
+  --line: rgba(26, 39, 32, 0.1);
+  --text: #18231d;
+  --muted: #526258;
+  --accent: #cb6b2d;
+  --good: #2c8f5a;
+  --bad: #cc5744;
+  --shadow: 0 20px 50px rgba(84, 63, 25, 0.12);
+
+  --overlay-xs: rgba(0, 0, 0, 0.02);
+  --overlay-sm: rgba(0, 0, 0, 0.04);
+  --overlay-md: rgba(0, 0, 0, 0.06);
+  --overlay-lg: rgba(0, 0, 0, 0.08);
+
+  --mint-overlay: rgba(44, 143, 90, 0.12);
+  --sand-overlay: rgba(203, 107, 45, 0.12);
+  --gold-overlay: rgba(200, 160, 40, 0.12);
+  --coral-overlay: rgba(204, 87, 68, 0.12);
+  --good-overlay: rgba(44, 143, 90, 0.14);
+  --bad-overlay: rgba(204, 87, 68, 0.14);
+
+  --text-inverse: #f6f2e8;
+
+  --body-grad-mid: #d8cbb5;
+  --body-grad-end: #c8b89a;
+}

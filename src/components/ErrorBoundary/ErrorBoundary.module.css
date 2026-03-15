@@ -1,0 +1,27 @@
+.container {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: var(--space-xl);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.heading {
+  margin: 0 0 var(--space-sm);
+}
+
+.stack {
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--bad);
+}

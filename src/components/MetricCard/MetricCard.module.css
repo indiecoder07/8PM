@@ -1,0 +1,29 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 120px;
+  padding: var(--space-md) 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.label {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.value {
+  display: block;
+  margin-top: 6px;
+  font-size: 1.4rem;
+}
+
+/* Accent variants */
+.mint  { background: linear-gradient(135deg, var(--mint-overlay),  var(--panel)); }
+.sand  { background: linear-gradient(135deg, var(--sand-overlay),  var(--panel)); }
+.gold  { background: linear-gradient(135deg, var(--gold-overlay),  var(--panel)); }
+.coral { background: linear-gradient(135deg, var(--coral-overlay), var(--panel)); }

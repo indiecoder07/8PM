@@ -1,0 +1,17 @@
+.badge {
+  display: inline-block;
+  border-radius: var(--radius-full);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--overlay-sm);
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+  line-height: 1;
+}
+
+.good {
+  background: var(--good-overlay);
+}
+
+.bad {
+  background: var(--bad-overlay);
+}

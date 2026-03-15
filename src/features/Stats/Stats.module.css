@@ -1,0 +1,76 @@
+.root {
+  display: grid;
+  gap: var(--space-md);
+}
+
+/* Leaderboard table */
+.table {
+  display: grid;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: 2fr repeat(4, 1fr);
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 0.9rem;
+}
+
+.tableRow:last-child {
+  border-bottom: 0;
+}
+
+.tableHead {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+/* Trend grid */
+.trendGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.trendCard {
+  padding: var(--space-md);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+}
+
+.trendName {
+  display: block;
+  font-size: 0.9rem;
+  margin-bottom: var(--space-xs);
+}
+
+.trendBar {
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--overlay-md);
+  overflow: hidden;
+  margin: 10px 0 var(--space-xs);
+}
+
+.trendFill {
+  display: block;
+  width: var(--bar-width, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent), var(--sand-overlay));
+  transition: width 400ms ease;
+}
+
+/* Responsive */
+@media (max-width: 720px) {
+  .tableRow {
+    grid-template-columns: 1fr;
+  }
+
+  .trendGrid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,97 @@
+.root {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: var(--space-md);
+  align-items: start;
+}
+
+/* Event buttons grid */
+.eventButtons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: var(--space-sm);
+}
+
+/* Match card */
+.matchCard {
+  padding: var(--space-lg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--overlay-xs), transparent);
+}
+
+.matchHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.matchSeason {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.matchTitle {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.matchMeta {
+  margin: var(--space-xs) 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Mini timeline */
+.miniTimeline {
+  display: grid;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+}
+
+.miniTimelineItem {
+  display: flex;
+  justify-content: space-between;
+  padding-top: var(--space-xs);
+  border-top: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+
+/* Upload extracting state */
+.uploading {
+  pointer-events: none;
+  opacity: 0.7;
+  border-color: var(--accent);
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--line);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .eventButtons {
+    grid-template-columns: 1fr;
+  }
+}

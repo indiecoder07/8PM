@@ -1,0 +1,148 @@
+/* ─── Layout utilities ─────────────────────────────────────── */
+
+.panel {
+  padding: var(--space-lg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+
+.stack {
+  display: grid;
+  gap: 14px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.formGrid label {
+  display: grid;
+  gap: var(--space-xs);
+}
+
+/* ─── Typography helpers ───────────────────────────────────── */
+
+.eyebrow {
+  margin: 0 0 4px;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* ─── Pill / badge ─────────────────────────────────────────── */
+
+.badge {
+  display: inline-block;
+  border-radius: var(--radius-full);
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--overlay-sm);
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+}
+
+.badgeGood {
+  composes: badge;
+  background: var(--good-overlay);
+}
+
+.badgeBad {
+  composes: badge;
+  background: var(--bad-overlay);
+}
+
+.resultPill {
+  composes: badge;
+}
+
+.resultPillGood {
+  composes: resultPill;
+  background: var(--good-overlay);
+}
+
+.resultPillBad {
+  composes: resultPill;
+  background: var(--bad-overlay);
+}
+
+/* ─── Buttons ──────────────────────────────────────────────── */
+
+.btn {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) 14px;
+}
+
+.primaryButton {
+  composes: btn;
+  background: var(--accent);
+  color: var(--text-inverse);
+  font-weight: 700;
+}
+
+.ghostButton {
+  composes: btn;
+  background: var(--overlay-xs);
+  color: var(--text);
+}
+
+.dangerButton {
+  composes: btn;
+  background: var(--bad-overlay);
+  color: var(--text);
+}
+
+.successButton {
+  composes: btn;
+  background: var(--good-overlay);
+  color: var(--text);
+}
+
+/* ─── Upload card ──────────────────────────────────────────── */
+
+.uploadCard {
+  display: grid;
+  gap: var(--space-xs);
+  padding: var(--space-md);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.uploadCard:hover {
+  border-color: var(--accent);
+  background: var(--overlay-xs);
+}
+
+.uploadCard input {
+  display: none;
+}
+
+.notice {
+  margin: 14px 0 0;
+  color: var(--good);
+}
+
+/* ─── Responsive ───────────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .panel {
+    padding: var(--space-md);
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

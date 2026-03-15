@@ -1,0 +1,44 @@
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.name {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.sub {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.score {
+  text-align: right;
+}
+
+.score strong {
+  display: block;
+  font-size: 1.05rem;
+}
+
+.cscore {
+  font-size: 0.8rem;
+  color: var(--muted);
+}

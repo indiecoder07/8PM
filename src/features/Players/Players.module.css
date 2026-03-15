@@ -1,0 +1,58 @@
+.root {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--space-md);
+  align-items: start;
+}
+
+/* Player card */
+.card {
+  padding: var(--space-lg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, var(--overlay-xs), transparent);
+  box-shadow: var(--shadow);
+}
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.cardName {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.cardSub {
+  margin: 4px 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.active   { color: var(--good); }
+.inactive { color: var(--muted); }
+
+/* Stats strip */
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-md);
+}
+
+/* Actions row */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin-top: var(--space-sm);
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .root {
+    grid-template-columns: 1fr;
+  }
+}
