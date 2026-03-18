@@ -30,9 +30,26 @@
   /* Inverse text (on dark pill / avatar backgrounds) */
   --text-inverse: #18231d;
 
+  /* Player avatar tones */
+  --avatar-amber: var(--accent);
+  --avatar-mint: #5cab83;
+  --avatar-coral: #c86f62;
+  --avatar-sky: #4f8ea8;
+  --avatar-slate: #6d7f75;
+
   /* Body gradient anchors */
   --body-grad-mid: #17352b;
   --body-grad-end: #0d1713;
+  --body-grad-anchor-warm: rgba(245, 166, 91, 0.18);
+  --body-grad-anchor-mint: rgba(113, 209, 158, 0.12);
+  --sidebar-bg: rgba(7, 16, 14, 0.3);
+  --event-shadow-good: rgba(113, 209, 158, 0.25);
+  --event-shadow-bad: rgba(239, 125, 109, 0.25);
+
+  --avatar-backdrop: rgba(0, 0, 0, 0.75);
+  --avatar-shadow: rgba(0, 0, 0, 0.6);
+  --avatar-close-bg: rgba(255, 255, 255, 0.12);
+  --avatar-close-bg-hover: rgba(255, 255, 255, 0.24);
 
   /* Border radius scale */
   --radius-sm: 14px;
@@ -77,6 +94,22 @@
 
   --text-inverse: #f6f2e8;
 
+  --avatar-amber: var(--accent);
+  --avatar-mint: #3f8a64;
+  --avatar-coral: #b15a4d;
+  --avatar-sky: #3f7e9a;
+  --avatar-slate: #5f6f66;
+
   --body-grad-mid: #d8cbb5;
   --body-grad-end: #c8b89a;
+  --body-grad-anchor-warm: rgba(203, 107, 45, 0.16);
+  --body-grad-anchor-mint: rgba(44, 143, 90, 0.14);
+  --sidebar-bg: rgba(255, 255, 255, 0.42);
+  --event-shadow-good: rgba(44, 143, 90, 0.24);
+  --event-shadow-bad: rgba(204, 87, 68, 0.22);
+
+  --avatar-backdrop: rgba(0, 0, 0, 0.65);
+  --avatar-shadow: rgba(0, 0, 0, 0.4);
+  --avatar-close-bg: rgba(255, 255, 255, 0.2);
+  --avatar-close-bg-hover: rgba(255, 255, 255, 0.32);
 }

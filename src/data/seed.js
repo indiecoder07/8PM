@@ -11,6 +11,17 @@ export const RESULT_OPTIONS = ["W", "L", "D"];
 
 export const VIEW_OPTIONS = ["dashboard", "players", "matches", "stats"];
 
+export const PLAYER_COLOR_OPTIONS = [
+  { value: "amber", label: "Amber" },
+  { value: "mint", label: "Mint" },
+  { value: "coral", label: "Coral" },
+  { value: "sky", label: "Sky" },
+  { value: "slate", label: "Slate" },
+];
+
+export const DEFAULT_PLAYER_COLOR = PLAYER_COLOR_OPTIONS[0].value;
+const VALID_PLAYER_COLORS = new Set(PLAYER_COLOR_OPTIONS.map((option) => option.value));
+
 /** Build an empty initial state for fresh installs. */
 export function createSeedState() {
   return {
@@ -20,6 +31,7 @@ export function createSeedState() {
     events:     [],
     scorecards: [],
     uploads:    [],
+    opponents:  [],
   };
 }
 
@@ -38,7 +50,7 @@ export function normalizeState(raw) {
       number: String(p.number || ""),
       avatar: String(p.avatar || ""),
       active: p.active !== false,
-      color:  String(p.color  || "#84a59d"),
+      color:  VALID_PLAYER_COLORS.has(p.color) ? p.color : DEFAULT_PLAYER_COLOR,
     }));
   const playerIds = new Set(players.map((p) => p.id));
 
@@ -102,6 +114,17 @@ export function normalizeState(raw) {
     }))
     .filter((u) => u.matchId);
 
+  const opponents = (Array.isArray(source.opponents) ? source.opponents : [])
+    .filter((o) => o && typeof o === "object" && o.name)
+    .map((o) => ({
+      id:   String(o.id   || uid("opponent")),
+      name: String(o.name).trim(),
+    }))
+    // deduplicate by name (case-insensitive)
+    .filter((o, i, arr) =>
+      arr.findIndex((x) => x.name.toLowerCase() === o.name.toLowerCase()) === i,
+    );
+
   return {
     players,
     seasons,
@@ -109,5 +132,6 @@ export function normalizeState(raw) {
     events,
     scorecards,
     uploads,
+    opponents,
   };
 }

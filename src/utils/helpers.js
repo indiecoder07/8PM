@@ -81,6 +81,19 @@ export function exportCsv(rows, filename) {
 }
 
 /**
+ * Format an ISO timestamp as a relative time string (e.g., "just now", "2m ago").
+ */
+export function timeAgo(iso) {
+  const seconds = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  if (seconds < 10) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.round(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.round(minutes / 60);
+  return `${hours}h ago`;
+}
+
+/**
  * Generate placeholder scorecard rows for a match (used in simulated extraction).
  */
 export function buildMockScorecards(players, matchId) {

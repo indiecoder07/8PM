@@ -5,3 +5,4 @@ dist/
 .vercel/
 .DS_Store
 vite.config.js.timestamp-*.mjs
+.vercel

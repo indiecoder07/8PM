@@ -1,4 +1,5 @@
 import { useFieldIQ } from "./context/FieldIQContext";
+import { useState } from "react";
 import { Dashboard } from "./features/Dashboard";
 import { Matches } from "./features/Matches";
 import { Players } from "./features/Players";
@@ -16,7 +17,21 @@ const FEATURE_MAP = {
 };
 
 export function App() {
-  const { view, setView, theme, toggleTheme, currentSeason, data, resetDemo } = useFieldIQ();
+  const { view, setView, theme, toggleTheme, currentSeason, data, loading } = useFieldIQ();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const handleNavSelect = (option) => {
+    setView(option);
+    setMenuOpen(false);
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingScreen}>
+        <div className={styles.loadingSpinner} aria-hidden="true" />
+        <p className={shared.muted}>Loading from Neon…</p>
+      </div>
+    );
+  }
 
   const ActiveView = FEATURE_MAP[view] || Dashboard;
 
@@ -24,48 +39,59 @@ export function App() {
     <div className={styles.shell}>
       {/* Sidebar */}
       <aside className={styles.sidebar}>
-        <div className={styles.brand}>
-          <div className={styles.brandMark} aria-hidden="true">8P</div>
-          <div>
-            <p className={cx(shared.eyebrow, styles.brandEyebrow)}>Indoor Cricket Ops</p>
-            <h1 className={styles.brandName}>8PM</h1>
-          </div>
-        </div>
-
-        <nav className={styles.nav} aria-label="Main navigation">
-          {VIEW_OPTIONS.map((option) => (
+        <div className={cx(styles.mobileMenu, menuOpen && styles.mobileMenuOpen)}>
+          <div className={styles.mobileSummary}>
+            <div className={styles.brand}>
+              <div className={styles.brandMark} aria-hidden="true">8P</div>
+              <div className={styles.brandText}>
+                <p className={cx(shared.eyebrow, styles.brandEyebrow)}>Indoor Cricket Ops</p>
+                <h1 className={styles.brandName}>8PM</h1>
+              </div>
+            </div>
             <button
-              key={option}
-              className={cx(styles.navLink, view === option && styles.navLinkActive)}
-              onClick={() => setView(option)}
+              className={styles.menuToggle}
               type="button"
-              aria-current={view === option ? "page" : undefined}
+              onClick={() => setMenuOpen((open) => !open)}
+              aria-expanded={menuOpen}
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
             >
-              {option.charAt(0).toUpperCase() + option.slice(1)}
+              <span />
+              <span />
+              <span />
             </button>
-          ))}
-        </nav>
+          </div>
 
-        <div className={styles.sidePanel}>
-          <p className={shared.eyebrow}>Workspace</p>
-          <p className={shared.muted}>Local-first MVP with browser persistence.</p>
-          <button className={shared.ghostButton} type="button" onClick={toggleTheme}>
-            Toggle {theme === "dark" ? "light" : "dark"} mode
-          </button>
-          <button className={shared.ghostButton} type="button" onClick={resetDemo}>
-            Reset demo data
-          </button>
+          <div className={styles.sidebarBody}>
+            <nav className={styles.nav} aria-label="Main navigation">
+              {VIEW_OPTIONS.map((option) => (
+                <button
+                  key={option}
+                  className={cx(styles.navLink, view === option && styles.navLinkActive)}
+                  onClick={() => handleNavSelect(option)}
+                  type="button"
+                  aria-current={view === option ? "page" : undefined}
+                >
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </button>
+              ))}
+            </nav>
+
+            <div className={styles.sidePanel}>
+              <p className={shared.eyebrow}>Workspace</p>
+              <button className={shared.ghostButton} type="button" onClick={toggleTheme}>
+                {theme === "dark" ? "Light mode" : "Dark mode"}
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
 
       {/* Main content */}
       <main className={styles.content}>
         <header className={styles.hero}>
-          <div>
-            <p className={shared.eyebrow}>Admin Command Centre</p>
-            <h2 className={styles.heroHeading}>
-              Track fielding in real time. Review contribution after the match.
-            </h2>
+          <div className={styles.heroLead}>
+            <h2 className={styles.heroTitle}>Overview</h2>
+            <p className={shared.muted}>{currentSeason?.name || "No active season"}</p>
           </div>
           <div className={styles.heroMeta}>
             <div className={styles.heroStat}>

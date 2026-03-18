@@ -1,22 +1,26 @@
-import { useState } from "react";
 import { Avatar } from "../../components/Avatar";
 import { Badge } from "../../components/Badge";
 import { SectionTitle } from "../../components/SectionTitle";
 import { useFieldIQ } from "../../context/FieldIQContext";
+import { PLAYER_COLOR_OPTIONS } from "../../data/seed";
 import { cx } from "../../utils/helpers";
 import shared from "../../styles/shared.module.css";
 import styles from "./Players.module.css";
 
-const DEFAULT_FORM = { name: "", number: "", color: "#f7b267" };
-
 export function Players({ className }) {
-  const { playerCards, addPlayer, togglePlayer, deletePlayer, updatePlayerAvatar } = useFieldIQ();
-  const [form, setForm] = useState(DEFAULT_FORM);
+  const {
+    playerCards,
+    playerForm,
+    updatePlayerFormField,
+    submitPlayerForm,
+    togglePlayer,
+    deletePlayer,
+    updatePlayerAvatar,
+  } = useFieldIQ();
 
   function handleSubmit(e) {
     e.preventDefault();
-    const ok = addPlayer(form);
-    if (ok) setForm((prev) => ({ ...DEFAULT_FORM, color: prev.color }));
+    submitPlayerForm();
   }
 
   return (
@@ -28,26 +32,31 @@ export function Players({ className }) {
           <label>
             Name
             <input
-              value={form.name}
-              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
+              value={playerForm.name}
+              onChange={(e) => updatePlayerFormField("name", e.target.value)}
               placeholder="Aarav Singh"
             />
           </label>
           <label>
             Jersey number
             <input
-              value={form.number}
-              onChange={(e) => setForm((prev) => ({ ...prev, number: e.target.value }))}
+              value={playerForm.number}
+              onChange={(e) => updatePlayerFormField("number", e.target.value)}
               placeholder="7"
             />
           </label>
           <label>
             Profile colour
-            <input
-              type="color"
-              value={form.color}
-              onChange={(e) => setForm((prev) => ({ ...prev, color: e.target.value }))}
-            />
+            <select
+              value={playerForm.color}
+              onChange={(e) => updatePlayerFormField("color", e.target.value)}
+            >
+              {PLAYER_COLOR_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
           </label>
           <button className={shared.primaryButton} type="submit">
             Save player

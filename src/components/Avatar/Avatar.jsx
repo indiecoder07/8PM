@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef } from "react";
 import { cx } from "../../utils/helpers";
 import styles from "./Avatar.module.css";
 
@@ -10,7 +10,7 @@ import styles from "./Avatar.module.css";
  */
 export function Avatar({
   name = "",
-  color,
+  color = "amber",
   avatar = "",
   small = false,
   editable = false,
@@ -18,7 +18,7 @@ export function Avatar({
   className,
 }) {
   const fileRef = useRef(null);
-  const [zoomed, setZoomed] = useState(false);
+  const lightboxRef = useRef(null);
 
   const initials = name
     .split(" ")
@@ -28,6 +28,14 @@ export function Avatar({
     .toUpperCase();
 
   const hasImage = Boolean(avatar);
+  const toneClass =
+    {
+      amber: styles.colorAmber,
+      mint: styles.colorMint,
+      coral: styles.colorCoral,
+      sky: styles.colorSky,
+      slate: styles.colorSlate,
+    }[color] || styles.colorAmber;
 
   const handleFileChange = useCallback(
     (e) => {
@@ -72,10 +80,9 @@ export function Avatar({
         {/* Clickable avatar */}
         <button
           type="button"
-          className={cx(styles.avatar, small && styles.small)}
-          style={{ "--avatar-color": color }}
+          className={cx(styles.avatar, toneClass, small && styles.small)}
           aria-label={hasImage ? `View ${name} photo` : `${name} avatar`}
-          onClick={hasImage ? () => setZoomed(true) : undefined}
+          onClick={hasImage ? () => lightboxRef.current?.showModal() : undefined}
           tabIndex={hasImage ? 0 : -1}
         >
           {hasImage ? (
@@ -110,17 +117,30 @@ export function Avatar({
         )}
       </div>
 
-      {/* Zoom lightbox */}
-      {zoomed && hasImage && (
-        <div className={styles.lightbox} onClick={() => setZoomed(false)} role="dialog" aria-label="Avatar preview">
+      {hasImage && (
+        <dialog
+          ref={lightboxRef}
+          className={styles.lightboxDialog}
+          aria-label="Avatar preview"
+          onClick={(event) => {
+            if (event.target === event.currentTarget) {
+              lightboxRef.current?.close();
+            }
+          }}
+        >
           <img src={avatar} alt={name} className={styles.lightboxImg} />
-          <button type="button" className={styles.lightboxClose} onClick={() => setZoomed(false)} aria-label="Close preview">
+          <button
+            type="button"
+            className={styles.lightboxClose}
+            onClick={() => lightboxRef.current?.close()}
+            aria-label="Close preview"
+          >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
             </svg>
           </button>
-        </div>
+        </dialog>
       )}
     </>
   );

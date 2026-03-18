@@ -1,45 +1,22 @@
-import { createSeedState, normalizeState } from "../data/seed";
+import { normalizeState } from "../data/seed";
 
-const STORAGE_KEY = "8pm-state-v1";
-const API_URL     = "/api/state";
-const API_SECRET  = import.meta.env.VITE_API_SECRET || "";
+const LEGACY_KEY = "8pm-state-v1";
+const API_URL    = "/api/state";
+const API_SECRET = import.meta.env.VITE_API_SECRET || "";
 
-// ── Synchronous localStorage (instant startup) ───────────────────────────────
-
-/**
- * Read and validate state from localStorage.
- * Returns seed state if nothing is stored or the payload is corrupt.
- * Intentionally synchronous — called inside useState() initialiser.
- */
-export function readStateSync() {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return createSeedState();
-    return normalizeState(JSON.parse(raw));
-  } catch {
-    window.localStorage.removeItem(STORAGE_KEY);
-    return createSeedState();
-  }
+// ── One-time localStorage cleanup ────────────────────────────────────────────
+// Remove any leftover data from the previous localStorage-backed architecture.
+try {
+  window.localStorage.removeItem(LEGACY_KEY);
+} catch {
+  // Storage unavailable — no-op.
 }
 
-/**
- * Persist state to localStorage.
- * Silently swallows quota-exceeded errors.
- */
-export function writeStateSync(state) {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  } catch {
-    // Quota exceeded or storage unavailable — no-op.
-  }
-}
-
-// ── Async Neon API (background cloud sync) ────────────────────────────────────
+// ── Neon API ──────────────────────────────────────────────────────────────────
 
 /**
  * Fetch state from the Neon-backed /api/state endpoint.
  * Returns null if the server has no state yet or if the request fails.
- * Failures are silent — the app falls back to localStorage.
  */
 export async function fetchStateFromServer() {
   try {
@@ -55,7 +32,7 @@ export async function fetchStateFromServer() {
 
 /**
  * Push state to the Neon-backed /api/state endpoint.
- * Fire-and-forget — the app continues working if the push fails.
+ * Fire-and-forget — failures are silent.
  */
 export async function pushStateToServer(state) {
   try {
@@ -67,6 +44,6 @@ export async function pushStateToServer(state) {
       body: JSON.stringify(state),
     });
   } catch {
-    // Network unavailable — localStorage copy is sufficient locally.
+    // Network unavailable — no-op.
   }
 }

@@ -4,7 +4,7 @@
  * GET  /api/state  → assembles state from individual tables
  * POST /api/state  → syncs incoming state into individual tables
  *
- * Tables: players, seasons, matches, events, scorecards, uploads
+ * Tables: players, seasons, matches, events, scorecards, uploads, opponents
  * Requires DATABASE_URL environment variable.
  */
 
@@ -90,18 +90,26 @@ async function ensureTables(db) {
       uploaded_at TEXT NOT NULL
     )
   `;
+
+  await db`
+    CREATE TABLE IF NOT EXISTS opponents (
+      id   TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE
+    )
+  `;
 }
 
 // ── GET: read all tables and assemble the state shape ───────────────────────
 
 async function getState(db) {
-  const [players, seasons, matches, events, scorecards, uploads] = await Promise.all([
+  const [players, seasons, matches, events, scorecards, uploads, opponents] = await Promise.all([
     db`SELECT id, name, number, avatar, active, color FROM players`,
     db`SELECT id, name, start_date, end_date FROM seasons`,
     db`SELECT id, season_id, date, opponent, result, our_score, opponent_score FROM matches`,
     db`SELECT id, match_id, player_id, type, timestamp FROM events`,
     db`SELECT id, match_id, player_id, rs, sr, ob, rc, wkts, econ, c FROM scorecards`,
     db`SELECT id, match_id, filename, uploaded_at FROM uploads`,
+    db`SELECT id, name FROM opponents ORDER BY name ASC`,
   ]);
 
   return {
@@ -131,6 +139,7 @@ async function getState(db) {
       id: r.id, matchId: r.match_id,
       filename: r.filename, uploadedAt: r.uploaded_at,
     })),
+    opponents: opponents.map((r) => ({ id: r.id, name: r.name })),
   };
 }
 
@@ -201,6 +210,17 @@ async function syncState(db, state) {
     await db`
       INSERT INTO uploads (id, match_id, filename, uploaded_at)
       VALUES (${u.id}, ${u.matchId}, ${u.filename}, ${u.uploadedAt})
+    `;
+  }
+
+  // Insert opponents
+  const opponents = state.opponents || [];
+  await db`DELETE FROM opponents`;
+  for (const o of opponents) {
+    await db`
+      INSERT INTO opponents (id, name)
+      VALUES (${o.id}, ${o.name})
+      ON CONFLICT (name) DO NOTHING
     `;
   }
 }

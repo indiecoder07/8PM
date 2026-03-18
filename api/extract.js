@@ -1,5 +1,5 @@
 /**
- * /api/extract — Scoresheet image → structured match + player stats via Gemini Vision
+ * /api/extract — Scoresheet image → structured match + player stats via OpenRouter (free router)
  *
  * POST /api/extract
  *   Body: { image: "<base64 data URL>", players: [{ id, name }] }
@@ -8,8 +8,11 @@
  *     scorecards: [ { playerId, rs, sr, ob, rc, wkts, econ, c } ]
  *   }
  *
- * Requires GEMINI_API_KEY environment variable.
+ * Requires OPENROUTER_API_KEY environment variable.
  */
+
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODEL          = "openrouter/free"; // auto-routes to any available free vision model
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
@@ -28,9 +31,9 @@ export default async function handler(req, res) {
     }
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: "GEMINI_API_KEY is not configured." });
+    return res.status(500).json({ error: "OPENROUTER_API_KEY is not configured." });
   }
 
   try {
@@ -43,12 +46,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing `players` array." });
     }
 
-    // Extract base64 content and media type from data URL
+    // Validate data URL format
     const imgMatch = image.match(/^data:(image\/\w+);base64,(.+)$/);
     if (!imgMatch) {
       return res.status(400).json({ error: "Invalid image data URL format." });
     }
-    const [, mimeType, base64Data] = imgMatch;
 
     const playerList = players.map((p) => `- ${p.name} (id: ${p.id})`).join("\n");
 
@@ -89,55 +91,57 @@ Rules:
 - If you cannot find a player's data, omit them from the array.
 - Return ONLY the JSON object, no markdown, no explanation.`;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(geminiUrl, {
+    const response = await fetch(OPENROUTER_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type":  "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+        "HTTP-Referer":  "https://8pm.vercel.app",  // helps OpenRouter identify your app
+        "X-Title":       "8PM FieldIQ",
+      },
       body: JSON.stringify({
-        contents: [
+        model: MODEL,
+        messages: [
           {
-            parts: [
+            role: "user",
+            content: [
               {
-                inline_data: {
-                  mime_type: mimeType,
-                  data: base64Data,
-                },
+                type: "image_url",
+                image_url: { url: image },   // OpenRouter accepts full data URLs directly
               },
               {
+                type: "text",
                 text: prompt,
               },
             ],
           },
         ],
-        generationConfig: {
-          temperature: 0,
-          maxOutputTokens: 2048,
-        },
+        temperature: 0,
+        max_tokens:  2048,
       }),
     });
 
     if (!response.ok) {
       const errBody = await response.text();
-      console.error("[/api/extract] Gemini API error:", response.status, errBody);
-      return res.status(502).json({ error: "Gemini API request failed.", detail: errBody });
+      console.error("[/api/extract] OpenRouter error:", response.status, errBody);
+      return res.status(502).json({ error: "OpenRouter API request failed.", detail: errBody });
     }
 
-    const result = await response.json();
-    const rawText = result.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
+    const result  = await response.json();
+    const rawText = result.choices?.[0]?.message?.content || "{}";
 
-    // Parse the JSON object from Gemini's response
+    // Parse the JSON object from the model's response
     let parsed;
     try {
-      const strippedText = rawText.replace(/```json?\s*/g, "").replace(/```\s*/g, "").trim();
-      parsed = JSON.parse(strippedText);
+      const stripped = rawText.replace(/```json?\s*/g, "").replace(/```\s*/g, "").trim();
+      parsed = JSON.parse(stripped);
     } catch (parseErr) {
-      console.error("[/api/extract] Failed to parse Gemini response:", rawText);
+      console.error("[/api/extract] Failed to parse model response:", rawText);
       return res.status(502).json({ error: "Could not parse extraction result.", raw: rawText });
     }
 
     // ── Validate match metadata ───────────────────────────────────
-    const matchData = parsed.match || {};
+    const matchData      = parsed.match || {};
     const extractedMatch = {
       opponent:      String(matchData.opponent || "Unknown"),
       ourScore:      Number(matchData.ourScore) || 0,
@@ -146,7 +150,7 @@ Rules:
     };
 
     // ── Validate scorecards ───────────────────────────────────────
-    const rawCards = Array.isArray(parsed.scorecards) ? parsed.scorecards : [];
+    const rawCards      = Array.isArray(parsed.scorecards) ? parsed.scorecards : [];
     const validPlayerIds = new Set(players.map((p) => p.id));
     const sanitisedCards = rawCards
       .filter((sc) => sc && validPlayerIds.has(sc.playerId))

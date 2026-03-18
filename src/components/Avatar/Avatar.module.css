@@ -22,7 +22,7 @@
   border-radius: var(--radius-md);
   display: grid;
   place-items: center;
-  background: var(--avatar-color, var(--accent));
+  background: var(--avatar-amber);
   color: var(--text-inverse);
   font-weight: 700;
   overflow: hidden;
@@ -35,6 +35,26 @@
 
 .small {
   border-radius: var(--radius-sm);
+}
+
+.colorAmber {
+  background: var(--avatar-amber);
+}
+
+.colorMint {
+  background: var(--avatar-mint);
+}
+
+.colorCoral {
+  background: var(--avatar-coral);
+}
+
+.colorSky {
+  background: var(--avatar-sky);
+}
+
+.colorSlate {
+  background: var(--avatar-slate);
 }
 
 .img {
@@ -75,25 +95,34 @@
 
 /* ─── Lightbox overlay ────────────────────────────────────── */
 
-.lightbox {
-  position: fixed;
-  inset: 0;
-  z-index: 9999;
-  display: grid;
-  place-items: center;
-  background: rgba(0, 0, 0, 0.75);
+.lightboxDialog {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  max-height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+}
+
+.lightboxDialog::backdrop {
+  background: var(--avatar-backdrop);
   backdrop-filter: blur(6px);
-  cursor: pointer;
   animation: fadeIn 180ms ease;
 }
 
 .lightboxImg {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   max-width: min(90vw, 400px);
   max-height: min(90vh, 400px);
   border-radius: var(--radius-lg);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 60px var(--avatar-shadow);
   object-fit: contain;
-  cursor: default;
+  cursor: zoom-out;
 }
 
 .lightboxClose {
@@ -105,8 +134,8 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background: var(--avatar-close-bg);
+  color: var(--text-inverse);
   display: grid;
   place-items: center;
   cursor: pointer;
@@ -114,7 +143,7 @@
 }
 
 .lightboxClose:hover {
-  background: rgba(255, 255, 255, 0.24);
+  background: var(--avatar-close-bg-hover);
 }
 
 @keyframes fadeIn {
