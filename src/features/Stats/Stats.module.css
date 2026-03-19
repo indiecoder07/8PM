@@ -2,123 +2,255 @@
   display: grid;
   gap: var(--space-md);
   min-width: 0;
-  overflow-x: clip;
 }
 
-.root > * {
-  min-width: 0;
-}
-
-/* Leaderboard table */
-.table {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-}
+/* ─── Export button ─────────────────────────────────────────── */
 
 .exportButton {
+  white-space: nowrap;
+}
+
+@media (min-width: 721px) {
+  .exportButton {
+    width: auto;
+    justify-self: start;
+  }
+}
+
+/* ─── Leaderboard: same grid-table at every viewport ────────── */
+/*
+ * .tableScroll  — horizontal scroll container
+ * .table        — single CSS grid; header + rows use display:contents
+ *                 so every cell shares the same column tracks
+ * Column 1 (Player) is position:sticky so it stays visible while scrolling
+ *
+ * Columns: Player | RS | RA | SR | OB | RC | Wkts | Econ | C | CA | Succ% | Catches | RO
+ */
+
+.tableScroll {
   width: 100%;
-  max-width: 100%;
-  text-align: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* clip top/bottom overflow so sticky cells don't bleed outside panel */
+  overflow-y: visible;
+}
+
+.table {
+  display: grid;
+  /* Player column a bit wider; stats columns equal and compact */
+  grid-template-columns: 140px repeat(12, minmax(52px, 1fr));
+  width: 100%;
+  min-width: 700px;
+  gap: 0;
+}
+
+.tableHasAction {
+  grid-template-columns: 140px repeat(12, minmax(52px, 1fr)) 60px;
+}
+
+/* Rows and header are transparent — cells are direct grid items */
+.tableHead,
+.tableRow {
+  display: contents;
+}
+
+/* ─── Header cells ──────────────────────────────────────────── */
+
+.tableHead > * {
+  padding: 7px 4px;
+  border-bottom: 2px solid var(--line);
+  align-self: end;
+}
+
+/* Sticky header player cell */
+.tableHead > *:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 3;
+  background: var(--panel-strong);
+}
+
+/* ─── Sort header button ────────────────────────────────────── */
+
+.thBtn {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  font-weight: 500;
+  width: 100%;
+  overflow: hidden;
+}
+
+.thBtn:first-child {
+  justify-content: flex-start;
+}
+
+.thBtn:hover {
+  color: var(--text);
+}
+
+.sortIconIdle {
+  opacity: 0.3;
+  font-size: 0.58rem;
+  flex-shrink: 0;
+}
+
+.sortIconActive {
+  color: var(--accent);
+  font-size: 0.65rem;
+  flex-shrink: 0;
+}
+
+/* ─── Data row cells ────────────────────────────────────────── */
+
+.tableRow > * {
+  padding: 9px 4px;
+  border-bottom: 1px solid var(--line);
+  align-self: center;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.82rem;
+}
+
+/* Last row: no bottom border */
+.tableRow:last-child > * {
+  border-bottom: 0;
+}
+
+/* Editing row highlight */
+.tableRowEditing > * {
+  background: var(--overlay-sm);
+}
+
+/* ─── Sticky player name column ─────────────────────────────── */
+
+.playerName,
+.editPlayerName {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  /* solid bg so scrolled content doesn't show through */
+  background: var(--panel-strong);
+  /* subtle right shadow to separate from scrolling content */
+  box-shadow: 2px 0 6px -2px rgba(0, 0, 0, 0.25);
+  font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 0.84rem;
 }
 
-.tableRow {
-  display: grid;
-  grid-template-columns: 2fr repeat(10, 1fr);
-  min-width: 920px;
-  padding: var(--space-sm) 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 0.85rem;
-  align-items: center;
+/* ─── Stat value cells ──────────────────────────────────────── */
+
+.statCell {
+  text-align: right;
 }
 
-/* Numeric scorecard columns */
-.colNum {
+.statLabel {
+  display: none;
+}
+
+.statValue {
   font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  display: block;
   text-align: right;
 }
 
-/* Fielding stat columns (grouped visually) */
-.colFielding {
-  font-variant-numeric: tabular-nums;
-  text-align: right;
+.statValueHighlight {
+  color: var(--accent);
+  font-weight: 600;
 }
 
-.fieldingInputPair {
-  display: inline-grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
-}
+/* ─── Action column ─────────────────────────────────────────── */
 
-.fieldingInput {
-  width: 100%;
-  max-width: 64px;
-  padding: 3px 5px;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-sm);
-  background: var(--overlay-xs);
-  color: var(--text);
-  font-size: 0.78rem;
-  text-align: right;
-}
-
-/* Action column (Edit button) — only shown in single-match mode */
 .colAction {
   display: flex;
   gap: 4px;
   justify-content: flex-end;
   white-space: nowrap;
+  align-self: center;
 }
 
-.tableRow:last-child {
-  border-bottom: 0;
+/* ─── Inline edit cells ─────────────────────────────────────── */
+
+.editCell {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
-.tableHead {
-  color: var(--muted);
-  text-transform: uppercase;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-}
-
-/* ─── Inline edit mode ──────────────────────────────────────── */
-
-.tableRowEditing {
-  background: var(--overlay-xs);
-  border-radius: var(--radius-sm);
-  padding: var(--space-sm) var(--space-xs);
-}
-
-.editPlayerName {
-  font-weight: 600;
+.editCellLabel {
+  display: none;
 }
 
 .editInput {
   width: 100%;
-  max-width: 84px;
-  padding: 3px 5px;
+  max-width: 60px;
+  padding: 3px 4px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--overlay-xs);
   color: var(--text);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
   text-align: right;
+  display: block;
+  margin-left: auto;
 }
 
 .editInput:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px var(--accent-overlay);
+  box-shadow: 0 0 0 2px var(--sand-overlay);
+}
+
+.fieldingInputPair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+}
+
+.fieldingInput {
+  width: 100%;
+  max-width: 40px;
+  padding: 3px 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--overlay-xs);
+  color: var(--text);
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.fieldingInput:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--sand-overlay);
+}
+
+.editActions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-end;
+  justify-content: center;
 }
 
 .editTriggerBtn {
-  padding: 2px 10px;
+  padding: 3px 10px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: var(--overlay-xs);
@@ -126,7 +258,6 @@
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 120ms ease;
 }
 
 .editTriggerBtn:hover {
@@ -134,7 +265,7 @@
 }
 
 .editSaveBtn {
-  padding: 2px 10px;
+  padding: 3px 10px;
   border: 1px solid var(--accent);
   border-radius: var(--radius-sm);
   background: var(--accent);
@@ -145,7 +276,7 @@
 }
 
 .editCancelBtn {
-  padding: 2px 8px;
+  padding: 3px 8px;
   border: 1px solid var(--line);
   border-radius: var(--radius-sm);
   background: transparent;
@@ -158,11 +289,24 @@
   color: var(--text);
 }
 
-/* Trend grid */
+/* ─── Contribution trend grid ───────────────────────────────── */
+
 .trendGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
+}
+
+@media (min-width: 721px) {
+  .trendGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1101px) {
+  .trendGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 .trendCard {
@@ -178,18 +322,10 @@
   margin-bottom: var(--space-xs);
 }
 
-.trendBar {
-  height: 12px;
-  border-radius: var(--radius-full);
-  background: var(--overlay-md);
-  overflow: hidden;
-  margin: 10px 0 var(--space-xs);
-}
-
 .trendProgress {
   width: 100%;
-  height: 12px;
-  margin: 10px 0 var(--space-xs);
+  height: 10px;
+  margin: 8px 0 var(--space-xs);
   border-radius: var(--radius-full);
   overflow: hidden;
   border: 0;
@@ -208,43 +344,4 @@
 .trendProgress::-moz-progress-bar {
   background: linear-gradient(90deg, var(--accent), var(--sand-overlay));
   border-radius: var(--radius-full);
-}
-
-/* Responsive — progressively hide less-critical columns */
-@media (max-width: 1100px) {
-  /* Hide fielding columns on medium screens */
-  .colFielding {
-    display: none;
-  }
-
-  .tableRow {
-    grid-template-columns: 2fr repeat(7, 1fr) auto;
-  }
-}
-
-@media (max-width: 800px) {
-  .tableRow {
-    grid-template-columns: 2fr repeat(7, 1fr) auto;
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 720px) {
-  .tableRow {
-    grid-template-columns: 2fr repeat(7, 1fr) auto;
-    font-size: 0.75rem;
-    gap: var(--space-xs);
-  }
-
-}
-
-@media (min-width: 721px) {
-  .exportButton {
-    width: auto;
-    justify-self: start;
-  }
-
-  .trendGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }

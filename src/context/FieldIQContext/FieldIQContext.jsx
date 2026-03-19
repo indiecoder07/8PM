@@ -203,20 +203,20 @@ export function FieldIQProvider({ children }) {
         const m = agg.matches || 1;
         return {
           player: pc,
-          rs:   agg.rs,
-          sr:   +(agg.sr / m).toFixed(2),
-          ob:   agg.ob,
-          rc:   agg.rc,
-          wkts: agg.wkts,
-          econ: +(agg.econ / m).toFixed(2),
-          c:    agg.c,
+          rs:   Math.round(agg.rs),
+          ra:   +(agg.rs / m).toFixed(1),
+          sr:   +(agg.sr / m).toFixed(1),
+          ob:   Math.round(agg.ob),
+          rc:   Math.round(agg.rc),
+          wkts: Math.round(agg.wkts),
+          econ: +(agg.econ / m).toFixed(1),
+          c:    Math.round(agg.c),
+          ca:   +(agg.c / m).toFixed(1),
           matches: agg.matches,
         };
       })
-      .sort((a, b) => {
-        const rDiff = (b.player.success?.rate || 0) - (a.player.success?.rate || 0);
-        return rDiff !== 0 ? rDiff : b.c - a.c;
-      });
+      // Default sort: CA high to low (overridden by UI sort state)
+      .sort((a, b) => b.ca - a.ca);
   }, [filteredScorecards, playerCards, data.players]);
 
   // ── Computed: dashboard ───────────────────────────────────────────────────

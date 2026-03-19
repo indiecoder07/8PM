@@ -31,11 +31,7 @@ select {
 
 button {
   cursor: pointer;
-  transition: transform 160ms ease, opacity 160ms ease, background 160ms ease;
-}
-
-button:hover {
-  transform: translateY(-1px);
+  transition: opacity 160ms ease, background 160ms ease;
 }
 
 input,

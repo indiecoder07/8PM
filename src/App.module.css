@@ -100,15 +100,15 @@
 
 .menuToggle {
   appearance: none;
-  border: 1px solid var(--text);
+  border: 1px solid var(--line);
   background: var(--panel);
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   display: grid;
   align-content: center;
   gap: 4px;
-  padding: 7px;
+  padding: 8px;
   cursor: pointer;
   flex-shrink: 0;
   position: absolute;
@@ -116,7 +116,6 @@
   right: 0;
   transform: translateY(-50%);
   z-index: 2;
-  box-shadow: 0 0 0 1px var(--overlay-sm);
 }
 
 .menuToggle span {
