@@ -1,5 +1,5 @@
 /**
- * /api/extract — Scoresheet image → structured match + player stats via OpenRouter (free router)
+ * /api/extract — Scoresheet image → structured match + player stats via OpenRouter
  *
  * POST /api/extract
  *   Body: { image: "<base64 data URL>", players: [{ id, name }] }
@@ -12,7 +12,7 @@
  */
 
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
-const MODEL          = "openrouter/free"; // auto-routes to any available free vision model
+const MODEL          = "google/gemini-2.5-flash-lite";
 
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", req.headers.origin || "*");
